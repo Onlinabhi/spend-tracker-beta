@@ -61,8 +61,3 @@ The current Money/Wealth page is encoded in the URL hash (`#money:transactions`,
 
 ## PWA contract
 The service worker cache is versioned and contains only files that actually exist in the build. Missing optional modules must never be listed in `cache.addAll`, because one missing cache asset can abort installation.
-
-## V22 controlled repair delta
-- V22 keeps the V21.01 application/data architecture and uses the inline approved Settings hub instead of the legacy modal settings overhaul.
-- The Settings hub contains the existing Profile, Appearance & text, Money categories, Payment methods, Income accounts, Backup & transfer, Personalization and Reset sections. Money/Wealth mode remains a top-level app switch, not a Settings item.
-- Floating dice owns only presentation state. Pointer events distinguish a click from a drag; release over an interactive control snaps to a safe location. Random movement also selects only safe locations. Manual placement pauses random movement for 30 seconds.
