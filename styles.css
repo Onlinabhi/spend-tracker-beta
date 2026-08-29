@@ -1,0 +1,72 @@
+/* Spend Tracker V21 design system: base styles + V21 overrides */
+@import url('./styles-base.css');
+
+/* V21 design system */
+:root{
+  --v21-radius-xl:26px;--v21-radius-lg:20px;--v21-radius-md:16px;
+  --v21-ease:cubic-bezier(.2,.8,.2,1);
+}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{overscroll-behavior-x:none}
+.app{width:100%;max-width:800px;min-width:0;overflow-x:clip}
+.app *{min-width:0;box-sizing:border-box}
+.top{gap:12px;padding:2px 1px 4px}
+.global-profile{width:48px;height:48px;padding:0;border:0;background:transparent;display:grid;place-items:center;flex:0 0 48px}
+.global-avatar{width:44px!important;height:44px!important;border-radius:15px!important;border:2px solid var(--surface);box-shadow:0 5px 16px rgba(0,0,0,.12);background:linear-gradient(145deg,var(--page-accent,var(--money)),var(--money2));display:grid;place-items:center;font-weight:900;font-size:16px;overflow:hidden;background-size:cover;background-position:center}
+.global-profile:active{transform:scale(.94)}
+.mode{box-shadow:0 4px 14px rgba(24,34,48,.05)}
+.mode button{transition:transform .18s var(--v21-ease),background .18s var(--v21-ease),box-shadow .18s var(--v21-ease)}
+.mode button:active{transform:scale(.98)}
+.hero,.wealth-hero{border-radius:var(--v21-radius-xl)}
+.card,.tx,.asset,.debt,.quick-card,.metric,.wealth-dashboard-card,.wealth-kpi-card,.wealth-allocation-card,.wealth-breakdown-card{border-radius:var(--v21-radius-lg);min-width:0}
+.quick-card{transition:transform .18s var(--v21-ease),box-shadow .18s var(--v21-ease)}
+.quick-card:active{transform:translateY(1px)}
+.section{min-width:0}.section h2,.section span{min-width:0}
+.section button,.link,.wealth-link{border-radius:12px;padding:8px 10px}
+.tx{cursor:pointer;transition:transform .16s var(--v21-ease),box-shadow .16s var(--v21-ease);position:relative}
+.tx:active{transform:scale(.995)}
+.tx-menu{z-index:2}
+/* V21 navigation */
+nav{left:0;right:0}
+.navinner{max-width:720px;margin:auto;grid-template-columns:repeat(4,1fr)!important;gap:7px!important;padding:8px!important;border-radius:24px!important}
+.navitem{min-width:0!important;border-radius:16px!important;padding:10px 5px!important;font-size:11px!important;font-weight:850!important;transition:all .18s var(--v21-ease)!important}
+.navitem span{font-size:20px!important;line-height:1!important;margin-bottom:3px!important}
+.navitem.money-selected,.navitem.wealth-selected{box-shadow:0 7px 16px rgba(0,0,0,.12)!important;transform:translateY(-1px)}
+/* Goals replaces the old Budgets label without changing its internal route */
+#mbudgets .section:first-child h2{font-size:22px}
+/* Profile/settings hub */
+#mmore,#wmore{padding-bottom:10px}
+.settings-head{margin-top:18px}
+.settings-head h2{letter-spacing:-.5px}
+.identity-card{box-shadow:0 8px 24px rgba(24,34,48,.06)}
+.settings-list-card{box-shadow:0 8px 24px rgba(24,34,48,.04)}
+.settings-list-card details summary{transition:background .16s var(--v21-ease)}
+.settings-list-card details summary:active{background:var(--surface2)}
+/* Modern More/Settings actions */
+.more-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.more-action{min-width:0!important;border-radius:16px!important;padding:14px!important;overflow:hidden}
+.more-action span{display:block;white-space:normal;overflow-wrap:anywhere}
+/* Preview sheets */
+.modal{z-index:1000}
+.sheet{width:min(100%,620px)!important;max-width:620px!important;max-height:88vh;overflow:auto;overflow-x:hidden;border-radius:28px 28px 0 0}
+/* Forms cannot force the viewport wider */
+input,select,textarea{max-width:100%;min-width:0}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.profile-fields,.profile-actions{min-width:0}
+/* Responsive safety */
+@media(max-width:560px){
+  .app{padding-left:14px;padding-right:14px}
+  .brand h1{font-size:26px!important;max-width:calc(100vw - 92px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .brand p{max-width:calc(100vw - 92px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .quick{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .hero-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .hero-stat{overflow:hidden}.hero-stat b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .two{grid-template-columns:1fr!important}
+  .navinner{border-radius:21px!important}
+}
+/* Theme presets */
+.theme-preset-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+.theme-preset{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 5px;font-size:10px;font-weight:850;min-width:0}
+.theme-preset i{display:block;width:25px;height:25px;border-radius:9px;margin:0 auto 5px;background:var(--swatch);box-shadow:inset 0 0 0 2px #ffffff66}
+.theme-preset.active{outline:2px solid var(--accent);outline-offset:1px}
+@media(max-width:420px){.theme-preset-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
