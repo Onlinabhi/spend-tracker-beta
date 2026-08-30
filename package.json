@@ -1,8 +1,8 @@
 {
-  "name": "spend-tracker-v21",
-  "version": "21.1.0",
+  "name": "spend-tracker-v23",
+  "version": "23.0.0",
   "private": true,
-  "description": "Spend Tracker V21 local-first Money + Wealth app",
+  "description": "Spend Tracker V23 local-first Money + Wealth app",
   "scripts": {
     "check": "node --check assets/app-legacy.js && node --check assets/v21.js",
     "build": "echo 'Static web build: no compilation required'"
