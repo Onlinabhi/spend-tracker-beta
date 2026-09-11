@@ -2900,7 +2900,11 @@ window.removePhoto = function(){ state.profile.photo = null; save(); renderProfi
 window.saveProfile = function(){
   state.profile.name = document.getElementById("profileNameInput").value.trim() || "Your name";
   state.profile.email = document.getElementById("profileEmailInput").value.trim();
-  save(); renderProfileAvatar(); openSettingsView("root"); toast("Profile saved");
+   save();
+renderProfileAvatar();
+updateAppIdentity();
+openSettingsView("root");
+toast("Profile saved");
 };
 
 function settingsAppearanceView(){
