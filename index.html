@@ -4,16 +4,17 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<meta content="#18202d" name="theme-color"/>
+<meta content="#062118" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <link href="manifest.webmanifest" rel="manifest"/>
-<meta content="Spend Tracker V24" name="application-name"/>
+<meta content="Spend Tracker" name="application-name"/>
 <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="Spend Tracker" name="apple-mobile-web-app-title"/>
-<link href="icons/icon-192.svg" rel="apple-touch-icon"/>
-<link href="icons/icon-192.svg" rel="icon" sizes="192x192" type="image/png"/>
-<link href="icons/icon-512.svg" rel="icon" sizes="512x512" type="image/png"/>
+<link href="icons/icon-192.png" rel="apple-touch-icon"/>
+<link href="icons/icon-192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="icons/icon-512.png" rel="icon" sizes="512x512" type="image/png"/>
+<link href="icons/icon-512.png" rel="shortcut icon" type="image/png"/>
 <title>
    Spend Tracker V24
   </title>
@@ -270,11 +271,17 @@ input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid va
 /* ---------- Floating Fun Dice ---------- */
 .fun-dice{position:fixed;width:52px;height:52px;border-radius:16px;background:linear-gradient(155deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 8px 20px rgba(0,0,0,.4);cursor:grab;z-index:60;user-select:none;touch-action:none}
 .fun-dice:active{cursor:grabbing}
-.fun-card{position:fixed;z-index:110;max-width:260px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:none}
-.fun-card.show{display:block;animation:fadeIn .18s ease}
-.fun-card-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:.85rem;margin-bottom:8px}
-.fun-card-head button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem}
-.fun-card p{margin:0;font-size:.88rem;line-height:1.4}
+.fun-backdrop{position:fixed;inset:0;z-index:105;background:rgba(0,0,0,0);display:none}
+.fun-backdrop.show{display:block}
+.fun-card{position:fixed;z-index:110;width:296px;max-width:calc(100vw - 24px);background:linear-gradient(155deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:20px;padding:18px 18px 14px;box-shadow:0 16px 40px rgba(0,0,0,.45);display:none}
+.fun-card.show{display:block;animation:fadeIn .2s ease}
+.fun-card-close{position:absolute;top:10px;right:10px;background:var(--bg2);border:none;width:26px;height:26px;border-radius:8px;color:var(--muted);cursor:pointer;font-size:.8rem}
+.fun-card-body{display:flex;gap:12px;align-items:flex-start;padding-right:14px}
+.fun-card-icon{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex:0 0 auto;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.fun-card-title{font-weight:800;font-size:.98rem;margin-bottom:4px}
+.fun-card-text{margin:0;font-size:1.08rem;line-height:1.5;color:var(--text)}
+.fun-card-timer{height:3px;background:var(--line);border-radius:3px;margin-top:14px;overflow:hidden}
+.fun-card-timer i{display:block;height:100%;width:100%;background:var(--accent);transform:scaleX(1);transform-origin:left}
 
 /* ---------- Toast ---------- */
 .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);color:var(--text);padding:10px 18px;border-radius:20px;font-size:.82rem;z-index:120;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;box-shadow:var(--shadow)}
@@ -3127,42 +3134,91 @@ const FunLibrary = {
     "Congratulations, you've unlocked another Tuesday of questionable spending.",
     "Money talks. Yours just said 'goodbye'.",
     "Somewhere, a piggy bank is judging you silently.",
-    "Your bank balance called. It wants a raise."
+    "Your bank balance called. It wants a raise.",
+    "Breaking news: local wallet found 90% empty, investigators baffled.",
+    "Your money left the chat.",
+    "Plot twist: the 'treat yourself' budget has no limit apparently.",
+    "Your savings account sent a friend request. You left it on read.",
+    "Studies show 100% of empty wallets were once full. Fascinating.",
+    "Your UPI app has seen things. Terrible, terrible things.",
+    "Rich in experiences, poor in rupees — the influencer starter pack.",
+    "Your bank statement called it 'creative spending'. We call it Tuesday.",
+    "Somewhere a spreadsheet just sighed audibly.",
+    "Your future retirement fund would like a word."
   ],
   sarcastic: [
     "Oh sure, 'just one more coffee' — said your bank balance never.",
     "Nothing says financial discipline like checking this app after spending.",
     "Bold of you to open a finance app right now.",
     "Impressive budgeting. Truly. (This is sarcasm.)",
-    "Sure, that was a 'necessary' purchase. Sure it was."
+    "Sure, that was a 'necessary' purchase. Sure it was.",
+    "Wow, a whole 30 seconds of not spending money. Record time.",
+    "'I'll start saving next month' — a timeless classic.",
+    "Congratulations on discovering online shopping has a checkout button.",
+    "Your budget called. It's filing a missing person report.",
+    "Ah yes, the classic 'it was on sale so I saved money' logic.",
+    "Nothing screams financial planning like impulse-buying at 1 AM.",
+    "Your emergency fund is currently an emergency itself.",
+    "Sure, one more subscription won't hurt. Neither did the last twelve."
   ],
   facts: [
     "The 50/30/20 rule suggests 50% needs, 30% wants, 20% savings.",
     "Compound interest was called the eighth wonder of the world by many economists.",
     "An emergency fund of 3–6 months of expenses is a common safety benchmark.",
     "Tracking expenses for just 30 days often reveals surprising spending leaks.",
-    "Small recurring subscriptions can quietly add up to a major yearly expense."
+    "Small recurring subscriptions can quietly add up to a major yearly expense.",
+    "Paying yourself first — saving before spending — is a core habit of consistent savers.",
+    "The earlier you start investing, the more time compounding has to work in your favor.",
+    "Lifestyle inflation is when spending rises to match income growth, quietly erasing gains.",
+    "Diversification spreads risk across assets rather than betting on just one.",
+    "A written budget, even a rough one, tends to outperform no budget at all.",
+    "Credit utilization below 30% is generally considered healthy for credit scores.",
+    "Inflation quietly reduces purchasing power even when your balance stays the same.",
+    "Round-number pricing (₹999 vs ₹1000) is a well-studied psychological pricing trick.",
+    "Automating savings removes the decision fatigue of 'saving later'.",
+    "Net worth, not income, is usually the better measure of financial progress."
   ],
   humour: [
     "Budgets are like gym memberships — great in theory, tested in January.",
     "Your future self called. They'd like a word about that shopping cart.",
     "Money doesn't grow on trees, but apparently it does on delivery apps.",
     "A penny saved is a penny you'll immediately forget you have.",
-    "Financial adulting: unlocked. Financial wisdom: still loading."
+    "Financial adulting: unlocked. Financial wisdom: still loading.",
+    "Warning: your cart total may cause sudden regret.",
+    "Budgeting apps: because spreadsheets weren't judgmental enough.",
+    "Your 'quick errand' just became a full shopping spree. Classic.",
+    "Net worth update: mostly worth your own sense of humor right now.",
+    "Somewhere, your future vacation fund is filing a complaint.",
+    "You didn't overspend, you 'invested in happiness'. Sure.",
+    "The snooze button on your budget alerts has seen a lot of action."
   ],
   motivational: [
     "Every rupee you track is a rupee you understand. Keep going.",
     "Small consistent savings beat big occasional ones. You're doing fine.",
     "Progress, not perfection — your future net worth thanks you.",
     "You don't need a perfect month, just a tracked one.",
-    "Every entry you log today builds the clarity you'll thank yourself for later."
+    "Every entry you log today builds the clarity you'll thank yourself for later.",
+    "Financial peace isn't about being rich — it's about being in control.",
+    "One good money decision today compounds into many tomorrow.",
+    "You showed up and tracked it. That's the whole game, really.",
+    "Discipline now buys freedom later. You're already ahead of most.",
+    "Small wins add up — every logged expense is one more win.",
+    "Your habits today are quietly building your net worth tomorrow.",
+    "You're not behind. You're building — one entry at a time."
   ],
   wisdom: [
     "Spend on what you value; cut ruthlessly on what you don't.",
     "Net worth is built quietly, one boring decision at a time.",
     "The best budget is the one you actually stick to, not the strictest one.",
     "Debt paid off is a guaranteed return — rare in any market.",
-    "Wealth is what you don't see: it's what's left after you don't spend."
+    "Wealth is what you don't see: it's what's left after you don't spend.",
+    "A budget is just telling your money where to go, instead of wondering where it went.",
+    "Financial freedom is bought with patience, not luck.",
+    "The goal isn't more money — it's more choices.",
+    "Comparison is the fastest way to sabotage a good financial plan.",
+    "Small leaks sink big ships — check the subscriptions.",
+    "Rich is a number. Wealthy is a habit.",
+    "Save first, spend what's left — not the other way around."
   ],
   contextual: [] // filled dynamically based on live app state
 };
@@ -3181,38 +3237,62 @@ function buildContextualMessages(){
   }
   return msgs;
 }
+const FUN_META = {
+  funny:        { emoji:"😂", label:"Just for laughs",   color:"#ff6fa5" },
+  sarcastic:    { emoji:"😏", label:"A little sarcasm",  color:"#8b7bff" },
+  facts:        { emoji:"💡", label:"Finance fact",      color:"#33c9a7" },
+  humour:       { emoji:"🤭", label:"A little humour",   color:"#ffb454" },
+  motivational: { emoji:"🚀", label:"Keep going",        color:"#2b6cff" },
+  wisdom:       { emoji:"🧠", label:"Financial wisdom",  color:"#d4af6a" },
+  contextual:   { emoji:"📍", label:"Right now",         color:"#ff6570" }
+};
 function pickFunMessage(){
   const p = state.personalization;
-  if(!p.enabled) return { title:"Brain Food", text:"Personalized messages are turned off. Enable them in Settings → Personalization." };
+  if(!p.enabled) return { emoji:"🎲", color:"var(--accent)", title:"Brain Food", text:"Personalized messages are turned off. Enable them in Settings → Personalization." };
   const pool = [];
-  if(p.funny) pool.push(["Just for laughs","funny"]);
-  if(p.humour) pool.push(["A little humour","humour"]);
-  if(p.facts) pool.push(["Finance fact","facts"]);
-  if(p.motivational) pool.push(["Keep going","motivational"]);
-  if(p.wisdom) pool.push(["Financial wisdom","wisdom"]);
-  if(p.contextual) pool.push(["Right now","contextual"]);
-  if(!pool.length) return { title:"Brain Food", text:"Turn on a category in Personalization settings to see messages here." };
-  const [title, cat] = pool[Math.floor(Math.random()*pool.length)];
+  if(p.funny) pool.push("funny");
+  if(p.humour) pool.push("humour");
+  if(p.facts) pool.push("facts");
+  if(p.motivational) pool.push("motivational");
+  if(p.wisdom) pool.push("wisdom");
+  if(p.contextual) pool.push("contextual");
+  if(!pool.length) return { emoji:"🎲", color:"var(--accent)", title:"Brain Food", text:"Turn on a category in Personalization settings to see messages here." };
+  const cat = pool[Math.floor(Math.random()*pool.length)];
+  const meta = FUN_META[cat];
   let list = cat==="contextual" ? buildContextualMessages() : FunLibrary[cat];
   if(!list || !list.length) list = ["Nothing here yet — check back after logging a bit more activity."];
   const text = list[Math.floor(Math.random()*list.length)];
-  return { title, text };
+  return { emoji:meta.emoji, color:meta.color, title:meta.label, text };
 }
 
 /* ============================================================
    FLOATING DICE (movement preserved as gentle autonomous drift + drag)
    ============================================================ */
-let dice, funCard, diceVX=0.35, diceVY=0.28, diceRAF=null, dragging=false, dragMoved=false, dragStart=null, funCardTimer=null;
-const FUN_CARD_AUTOCLOSE_MS = 20000; // auto-dismiss the dice preview after 20s (within the requested 15-30s range)
+let dice, funCard, funBackdrop, diceVX=0.35, diceVY=0.28, diceRAF=null, dragging=false, dragMoved=false, dragStart=null, funCardTimer=null;
+const FUN_CARD_AUTOCLOSE_MS = 10000; // auto-dismiss the dice preview after 10s
 function buildDiceAndFunCard(){
   dice = document.createElement("div");
   dice.className = "fun-dice"; dice.id = "funDice"; dice.textContent = "🎲";
   dice.style.left = (window.innerWidth-84)+"px"; dice.style.top = (window.innerHeight-220)+"px";
   document.body.appendChild(dice);
 
+  funBackdrop = document.createElement("div");
+  funBackdrop.className = "fun-backdrop"; funBackdrop.id = "funBackdrop";
+  funBackdrop.addEventListener("click", ()=>window.closeFunCard());
+  document.body.appendChild(funBackdrop);
+
   funCard = document.createElement("div");
   funCard.className = "fun-card"; funCard.id = "funCard";
-  funCard.innerHTML = `<div class="fun-card-head"><span id="funCardTitle">🎲 Brain Food</span><button onclick="closeFunCard()">✕</button></div><p id="funCardText"></p>`;
+  funCard.innerHTML = `
+    <button class="fun-card-close" onclick="closeFunCard()">✕</button>
+    <div class="fun-card-body">
+      <div class="fun-card-icon" id="funCardIcon">🎲</div>
+      <div class="fun-card-copy">
+        <div class="fun-card-title" id="funCardTitle">Brain Food</div>
+        <p class="fun-card-text" id="funCardText"></p>
+      </div>
+    </div>
+    <div class="fun-card-timer"><i id="funCardTimerBar"></i></div>`;
   document.body.appendChild(funCard);
 
   dice.addEventListener("pointerdown", diceDown);
@@ -3234,19 +3314,31 @@ function diceMove(e){
 function diceUp(){ if(dragging && !dragMoved) diceClicked(); dragging=false; }
 function diceClicked(){
   const msg = pickFunMessage();
-  document.getElementById("funCardTitle").textContent = "🎲 " + msg.title;
+  const icon = document.getElementById("funCardIcon");
+  icon.textContent = msg.emoji;
+  icon.style.background = msg.color;
+  document.getElementById("funCardTitle").textContent = msg.title;
   document.getElementById("funCardText").textContent = msg.text;
+
   const dx = parseFloat(dice.style.left), dy = parseFloat(dice.style.top);
-  let cx = dx-208, cy = dy-70;
+  let cx = dx-244, cy = dy-100;
   if(cx<8) cx = dx+64;
   if(cy<8) cy = 8;
-  funCard.style.left = clamp(cx,8,window.innerWidth-268)+"px";
-  funCard.style.top = clamp(cy,8,window.innerHeight-200)+"px";
+  funCard.style.left = clamp(cx,8,window.innerWidth-304)+"px";
+  funCard.style.top = clamp(cy,8,window.innerHeight-220)+"px";
   funCard.classList.add("show");
+  funBackdrop.classList.add("show");
+
+  const bar = document.getElementById("funCardTimerBar");
+  bar.style.transition = "none"; bar.style.transform = "scaleX(1)";
+  void bar.offsetWidth; // force reflow so the next transition actually animates
+  bar.style.transition = `transform ${FUN_CARD_AUTOCLOSE_MS}ms linear`;
+  bar.style.transform = "scaleX(0)";
+
   clearTimeout(funCardTimer);
-  funCardTimer = setTimeout(()=>{ funCard.classList.remove("show"); }, FUN_CARD_AUTOCLOSE_MS);
+  funCardTimer = setTimeout(()=>{ window.closeFunCard(); }, FUN_CARD_AUTOCLOSE_MS);
 }
-window.closeFunCard = function(){ clearTimeout(funCardTimer); funCard.classList.remove("show"); };
+window.closeFunCard = function(){ clearTimeout(funCardTimer); funCard.classList.remove("show"); funBackdrop.classList.remove("show"); };
 function driftDice(){
   // Gentle constant-speed ambient float; unaffected by drag responsiveness setting.
   function step(){
