@@ -2104,25 +2104,30 @@ window.openTransaction = function(id, type){
   openModal("txModal");
 };
 
-window.hsaveTransaction = function(){
+window.saveTransaction = function(){
   let tx;
   if(currentTxType==="transfer"){
     const amount = parseFloat(document.getElementById("tAmount").value);
     const person = document.getElementById("tPerson").value.trim();
-    if(!amount || amount<=0 || (currentTxType==="expense" && !category)){
-  toast(currentTxType==="expense" ? "Amount and category are required" : "Amount is required");
-  return;
-}
+    if(!amount || amount<=0 || !person){
+      toast("Amount and person are required");
+      return;
+    }
     tx = { type:"transfer", amount, person, occasion:document.getElementById("tOccasion").value.trim(),
       method:document.getElementById("tMethod").value, date:document.getElementById("tDate").value||todayISO() };
+  } else if(currentTxType==="income"){
+    const amount = parseFloat(document.getElementById("fAmount").value);
+    const account = document.getElementById("fAccount").value;
+    if(!amount || amount<=0){ toast("Amount is required"); return; }
+    tx = { type:"income", amount, account, date:document.getElementById("fDate").value||todayISO(),
+      desc:document.getElementById("fDesc").value.trim() };
   } else {
     const amount = parseFloat(document.getElementById("fAmount").value);
     const category = document.getElementById("fCat").value;
-    if(!amount || amount<=0 || !category){ toast("Amount and category are required"); return; }
-    tx = { type:currentTxType, amount, category, date:document.getElementById("fDate").value||todayISO(),
+    const method = document.getElementById("fMethod").value;
+    if(!amount || amount<=0 || !category || !method){ toast("Amount, category and payment method are required"); return; }
+    tx = { type:"expense", amount, category, method, date:document.getElementById("fDate").value||todayISO(),
       desc:document.getElementById("fDesc").value.trim() };
-    if(currentTxType==="income") tx.account = document.getElementById("fAccount").value;
-    else tx.method = document.getElementById("fMethod").value;
   }
   if(editingTxId){
     const idx = state.money.transactions.findIndex(t=>t.id===editingTxId);
@@ -2148,7 +2153,7 @@ function categoryLabel(id){ const c = state.money.categories.find(c=>c.id===id);
 function methodLabel(id){ const m = state.money.methods.find(m=>m.id===id); return m ? m.name : ""; }
 function accountLabel(id){ const a = state.money.accounts.find(a=>a.id===id); return a ? a.name : ""; }
 function txIcon(tx){ return tx.type==="income" ? "💰" : tx.type==="transfer" ? "🤝" : (state.money.categories.find(c=>c.id===tx.category)||{}).icon || "💸"; }
-function txTitle(tx){ return tx.type==="income" ? categoryLabel(tx.category) : tx.type==="transfer" ? ("To "+tx.person) : categoryLabel(tx.category); }
+function txTitle(tx){ return tx.type==="income" ? (tx.desc && tx.desc.trim() ? tx.desc.trim() : (accountLabel(tx.account) || "Income")) : tx.type==="transfer" ? ("To "+tx.person) : categoryLabel(tx.category); }
 function txSub(tx){
   if(tx.type==="transfer") return (tx.occasion? tx.occasion+" · ":"") + fmtDate(tx.date);
   const loc = tx.type==="income" ? accountLabel(tx.account) : methodLabel(tx.method);
@@ -2203,7 +2208,7 @@ window.openTxAction = function(id){
   const amt = tx.type==="income" ? "+"+fmt(tx.amount) : tx.type==="expense" ? "-"+fmt(tx.amount) : fmt(tx.amount);
   const lines = [`Amount: ${amt}`, `Type: ${tx.type}`, `Date: ${fmtDate(tx.date)}`];
   if(tx.type==="transfer"){ lines.push(`Person: ${tx.person}`); if(tx.occasion) lines.push(`Occasion: ${tx.occasion}`); if(tx.method) lines.push(`Method: ${methodLabel(tx.method)}`); }
-  else{ lines.push(`Category: ${categoryLabel(tx.category)}`); lines.push(tx.type==="income" ? `Account: ${accountLabel(tx.account)}` : `Method: ${methodLabel(tx.method)}`); if(tx.desc) lines.push(`Notes: ${tx.desc}`); }
+  else{ if(tx.type!=="income") lines.push(`Category: ${categoryLabel(tx.category)}`); lines.push(tx.type==="income" ? `Account: ${accountLabel(tx.account)}` : `Method: ${methodLabel(tx.method)}`); if(tx.desc) lines.push(`Notes: ${tx.desc}`); }
   document.getElementById("txActionMeta").innerHTML = lines.map(l=>escapeHtml(l)).join("<br>");
   openModal("txActionModal");
 };
@@ -2967,7 +2972,7 @@ window.exportJSON = function(){
 window.exportCSV = function(){
   const rows = [["Date","Type","Amount","Category/Person","Method/Account","Description"]];
   state.money.transactions.forEach(t=>{
-    rows.push([t.date, t.type, t.amount, t.type==="transfer"?t.person:categoryLabel(t.category), t.type==="income"?accountLabel(t.account):(t.type==="transfer"?methodLabel(t.method):methodLabel(t.method)), t.desc||t.occasion||""]);
+    rows.push([t.date, t.type, t.amount, t.type==="transfer"?t.person:(t.type==="income"?"":categoryLabel(t.category)), t.type==="income"?accountLabel(t.account):methodLabel(t.method), t.desc||t.occasion||""]);
   });
   const csv = rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
   downloadBlob(new Blob([csv],{type:"text/csv"}), `spend-tracker-transactions-${todayISO()}.csv`);
