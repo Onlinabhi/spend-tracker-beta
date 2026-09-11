@@ -2812,12 +2812,23 @@ window.confirmDelete = function(){
 /* ============================================================
    SETTINGS / PROFILE
    ============================================================ */
+function updateAppIdentity(){
+  const name = (state.profile.name || "").trim();
+  const displayName = name || "Spend Tracker";
+  const title = name ? `${displayName}'s Money` : "Spend Tracker";
+
+  const appTitle = document.getElementById("appTitle");
+  if(appTitle) appTitle.textContent = title;
+
+  document.title = title;
+}
+
 function renderProfileAvatar(){
   const el = document.getElementById("globalProfileAvatar");
   if(state.profile.photo) el.innerHTML = `<img src="${state.profile.photo}" alt="">`;
   else el.textContent = (state.profile.name||"A").trim().charAt(0).toUpperCase() || "A";
 }
-
+   
 function renderSettingsMount(view, arg){
   const mounts = document.querySelectorAll(".v24-settings-mount");
   const html = settingsViewHtml(view, arg);
