@@ -2066,6 +2066,8 @@ window.setTxType = function(type){
   else{
     normal.style.display=""; transfer.style.display="none";
     const isIncome = type==="income";
+     document.getElementById("categoryLabel").style.display = isIncome ? "none" : "";
+document.getElementById("fCat").style.display = isIncome ? "none" : "";
     document.getElementById("methodLabel").style.display = isIncome ? "none" : "";
     document.getElementById("fMethod").style.display = isIncome ? "none" : "";
     document.getElementById("accountLabel").style.display = isIncome ? "" : "none";
@@ -2102,12 +2104,15 @@ window.openTransaction = function(id, type){
   openModal("txModal");
 };
 
-window.saveTransaction = function(){
+window.hsaveTransaction = function(){
   let tx;
   if(currentTxType==="transfer"){
     const amount = parseFloat(document.getElementById("tAmount").value);
     const person = document.getElementById("tPerson").value.trim();
-    if(!amount || amount<=0 || !person){ toast("Amount and person are required"); return; }
+    if(!amount || amount<=0 || (currentTxType==="expense" && !category)){
+  toast(currentTxType==="expense" ? "Amount and category are required" : "Amount is required");
+  return;
+}
     tx = { type:"transfer", amount, person, occasion:document.getElementById("tOccasion").value.trim(),
       method:document.getElementById("tMethod").value, date:document.getElementById("tDate").value||todayISO() };
   } else {
