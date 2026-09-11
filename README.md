@@ -1,13 +1,18 @@
-# Spend Tracker V22
+# Spend Tracker V24
 
-Controlled repair build based on the V23.01 test baseline.
+Standalone static PWA build based on the audited V23 source package.
 
-## V22 focus
-- Preserve the approved Money + Wealth architecture and existing working logic.
-- Restore the approved Settings hub layout. No Money/Wealth switch is embedded in Settings.
-- Keep the existing V23.01 functional fixes for transfers, search, themes, progress, profile, backup/restore/merge, personalization, and web route persistence.
-- Improve the floating dice: drag support, safe placement away from interactive controls, click/tap to open the existing Fun Engine, and a cooldown after manual placement.
+## V24 scope
+- Preserve the existing Money + Wealth application and financial logic.
+- Replace only the Settings presentation with a clean V24 profile/settings UI.
+- Remove Wealth Setup from Settings. Wealth mode itself remains unchanged.
+- Keep profile photo/name/email editing compatible with the existing profile store.
+- Preserve existing categories, payment methods, income accounts, backup, personalization and reset functions.
+- Keep the existing floating dice movement/drag mechanics.
+- Route dice clicks through the modular Fun Engine and show the generated entry in the Brain Food preview card.
 
-No unrelated redesigns or feature rewrites are included.
+## Run
+Serve this folder from a local HTTP server. Opening `index.html` directly can prevent PWA/service-worker features from working in some browsers.
 
-- `assets/settings-v23.js` - settings/profile presentation layer and settings interaction adapters.
+## Validation
+`npm run check` validates JavaScript syntax. `npm run build` is a static-build marker because no compilation is required.
