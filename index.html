@@ -2962,7 +2962,11 @@ function settingsBackupView(){
   </div>
   <label>Restore from backup</label>
   <button class="add-row-btn" onclick="document.getElementById('restoreInput').click()">Select backup file…</button>
-  <input type="file" id="restoreInput" class="file-hidden" accept="application/json" onchange="onRestoreSelected(event)">`;
+  <input type="file" id="restoreInput" class="file-hidden" accept="application/json" onchange="onRestoreSelected(event)">
+  <label>Import transactions from CSV</label>
+  <p class="small">Adds rows to your existing transactions — nothing is overwritten, and Wealth, settings and profile are never touched.</p>
+  <button class="add-row-btn" onclick="document.getElementById('csvImportInput').click()">Import transactions (CSV)…</button>
+  <input type="file" id="csvImportInput" class="file-hidden" accept=".csv,text/csv" onchange="onCSVImportSelected(event)">`;
 }
 window.exportJSON = function(){
   const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
@@ -2996,6 +3000,98 @@ window.onRestoreSelected = function(ev){
     localStorage.setItem(STORE_KEY+"_safety_"+Date.now(), JSON.stringify(state));
     state = deepMerge(defaultState(), parsed);
     save(); location.reload();
+  };
+  reader.readAsText(file);
+};
+
+/* ---- CSV transaction import (append-only; never touches Wealth/settings/profile) ---- */
+function parseCSV(text){
+  const rows = []; let row = [], field = "", inQuotes = false;
+  text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else inQuotes=false; }
+      else field+=c;
+    } else {
+      if(c==='"') inQuotes=true;
+      else if(c===','){ row.push(field); field=""; }
+      else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else field+=c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.length>1 || (r.length===1 && r[0].trim()!==""));
+}
+function findOrCreateCategory(name){
+  name = (name||"Other").trim() || "Other";
+  let c = state.money.categories.find(c=>c.name.toLowerCase()===name.toLowerCase());
+  if(!c){ c = {id:uid(), name, icon:"🔸"}; state.money.categories.push(c); }
+  return c.id;
+}
+function findOrCreateMethod(name){
+  name = (name||"Other").trim() || "Other";
+  let m = state.money.methods.find(m=>m.name.toLowerCase()===name.toLowerCase());
+  if(!m){ m = {id:uid(), name, type:name}; state.money.methods.push(m); }
+  return m.id;
+}
+function findOrCreateAccount(name){
+  name = (name||"Other").trim() || "Other";
+  let a = state.money.accounts.find(a=>a.name.toLowerCase()===name.toLowerCase());
+  if(!a){ a = {id:uid(), name}; state.money.accounts.push(a); }
+  return a.id;
+}
+window.onCSVImportSelected = function(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    let table;
+    try{ table = parseCSV(String(reader.result)); }catch(e){ toast("Could not read that CSV file."); ev.target.value=""; return; }
+    if(!table.length){ toast("That CSV file is empty."); ev.target.value=""; return; }
+    const header = table[0].map(h=>h.trim().toLowerCase());
+    const idx = {
+      date: header.indexOf("date"),
+      type: header.indexOf("type"),
+      amount: header.indexOf("amount"),
+      catPerson: header.findIndex(h=>h==="category/person"||h==="category"||h==="person"),
+      methodAccount: header.findIndex(h=>h==="method/account"||h==="method"||h==="account"),
+      desc: header.findIndex(h=>h==="description"||h==="notes")
+    };
+    if(idx.date===-1 || idx.type===-1 || idx.amount===-1){
+      alert("This CSV is missing one or more required columns: Date, Type, Amount.\nImport cancelled — no data was changed.");
+      ev.target.value=""; return;
+    }
+    const toImport = [], errors = [];
+    for(let r=1;r<table.length;r++){
+      const row = table[r]; if(!row || row.every(c=>!c.trim())) continue;
+      const date = (row[idx.date]||"").trim();
+      const type = (row[idx.type]||"").trim().toLowerCase();
+      const amount = parseFloat(row[idx.amount]);
+      const catPerson = idx.catPerson>-1 ? (row[idx.catPerson]||"").trim() : "";
+      const methodAccount = idx.methodAccount>-1 ? (row[idx.methodAccount]||"").trim() : "";
+      const desc = idx.desc>-1 ? (row[idx.desc]||"").trim() : "";
+      if(!["expense","income","transfer"].includes(type)){ errors.push(`Row ${r+1}: unrecognized type "${type||"(blank)"}"`); continue; }
+      if(!date || isNaN(new Date(date).getTime())){ errors.push(`Row ${r+1}: invalid date "${date}"`); continue; }
+      if(!amount || amount<=0){ errors.push(`Row ${r+1}: invalid amount`); continue; }
+      const isoDate = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : new Date(date).toISOString().slice(0,10);
+      const tx = { id:uid(), createdAt:Date.now(), type, amount, date:isoDate };
+      if(type==="expense"){ tx.category = findOrCreateCategory(catPerson); tx.method = findOrCreateMethod(methodAccount); tx.desc = desc; }
+      else if(type==="income"){ tx.account = findOrCreateAccount(methodAccount); tx.desc = desc; }
+      else { tx.person = catPerson || "Unknown"; tx.method = methodAccount ? findOrCreateMethod(methodAccount) : ""; tx.occasion = desc; }
+      toImport.push(tx);
+    }
+    if(!toImport.length){
+      alert("No valid rows found to import." + (errors.length ? "\n\n"+errors.slice(0,10).join("\n") : ""));
+      ev.target.value=""; return;
+    }
+    let msg = `Import ${toImport.length} transaction(s) from this CSV?\n\nThey'll be added to your existing transactions — nothing will be overwritten or deleted.`;
+    if(errors.length) msg += `\n\n${errors.length} row(s) were skipped due to errors:\n` + errors.slice(0,8).join("\n") + (errors.length>8 ? `\n…and ${errors.length-8} more` : "");
+    if(!confirm(msg)){ ev.target.value=""; return; }
+    state.money.transactions = toImport.concat(state.money.transactions);
+    save(); populateSelectors();
+    renderMoneyHome(); renderMoneyTransactions(); renderMoneyAnalytics(); renderBudgetsScreen();
+    toast(`Imported ${toImport.length} transaction(s)`);
+    ev.target.value="";
   };
   reader.readAsText(file);
 };
@@ -3106,7 +3202,8 @@ function pickFunMessage(){
 /* ============================================================
    FLOATING DICE (movement preserved as gentle autonomous drift + drag)
    ============================================================ */
-let dice, funCard, diceVX=0.35, diceVY=0.28, diceRAF=null, dragging=false, dragMoved=false, dragStart=null;
+let dice, funCard, diceVX=0.35, diceVY=0.28, diceRAF=null, dragging=false, dragMoved=false, dragStart=null, funCardTimer=null;
+const FUN_CARD_AUTOCLOSE_MS = 20000; // auto-dismiss the dice preview after 20s (within the requested 15-30s range)
 function buildDiceAndFunCard(){
   dice = document.createElement("div");
   dice.className = "fun-dice"; dice.id = "funDice"; dice.textContent = "🎲";
@@ -3146,8 +3243,10 @@ function diceClicked(){
   funCard.style.left = clamp(cx,8,window.innerWidth-268)+"px";
   funCard.style.top = clamp(cy,8,window.innerHeight-200)+"px";
   funCard.classList.add("show");
+  clearTimeout(funCardTimer);
+  funCardTimer = setTimeout(()=>{ funCard.classList.remove("show"); }, FUN_CARD_AUTOCLOSE_MS);
 }
-window.closeFunCard = function(){ funCard.classList.remove("show"); };
+window.closeFunCard = function(){ clearTimeout(funCardTimer); funCard.classList.remove("show"); };
 function driftDice(){
   // Gentle constant-speed ambient float; unaffected by drag responsiveness setting.
   function step(){
