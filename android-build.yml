@@ -1,13 +1,15 @@
 name: Build Android APK
 
-# Manual trigger only, per the requirement: Actions -> Build Android APK ->
-# Run workflow -> pick a branch -> Run. The branch dropdown works because
-# workflow_dispatch has no branch filter here — but note that GitHub only
-# lets you select a branch in that dropdown if THIS FILE already exists on
-# that branch. If it's only committed to New-arch, it will only be
-# selectable there (and on main once/if it's merged) — that is expected,
-# not a bug.
+# Triggers automatically on every push to New-arch (so you don't need this
+# file on the default branch first for a run to appear), and on any pull
+# request targeting main (so a proposed merge gets checked before it lands).
+# workflow_dispatch is kept too, for manual re-runs — it will start working
+# from the Actions UI dropdown once this file also exists on main.
 "on":
+  push:
+    branches: ["New-arch"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch: {}
 
 jobs:
