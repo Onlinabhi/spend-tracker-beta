@@ -1,0 +1,84 @@
+name: Build Android APK
+
+# Manual trigger only, per the requirement: Actions -> Build Android APK ->
+# Run workflow -> pick a branch -> Run. The branch dropdown works because
+# workflow_dispatch has no branch filter here — but note that GitHub only
+# lets you select a branch in that dropdown if THIS FILE already exists on
+# that branch. If it's only committed to New-arch, it will only be
+# selectable there (and on main once/if it's merged) — that is expected,
+# not a bug.
+"on":
+  workflow_dispatch: {}
+
+jobs:
+  build-debug-apk:
+    name: Typecheck, test, build, and package a debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Web production build
+        run: npm run build
+
+      # Adds the native Android platform only if it isn't already committed
+      # to the repo. If android/ already exists, this step does nothing —
+      # `cap sync` (next step) still runs either way.
+      - name: Add Android platform if missing
+        run: |
+          if [ ! -d "android" ]; then
+            echo "No android/ folder found — running 'npx cap add android'."
+            npx cap add android
+          else
+            echo "android/ folder already present — skipping 'cap add'."
+          fi
+
+      - name: Capacitor sync
+        run: npx cap sync android
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Android build (debug)
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      # Fails the workflow explicitly if the APK is missing, rather than
+      # trusting a green Gradle exit code alone.
+      - name: Verify APK exists
+        run: |
+          APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            echo "::error::Expected APK not found at $APK_PATH"
+            exit 1
+          fi
+          echo "Found APK at $APK_PATH ($(du -h "$APK_PATH" | cut -f1))"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spend-tracker-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

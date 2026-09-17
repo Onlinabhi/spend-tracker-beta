@@ -44,9 +44,32 @@ UI/styling iteration but will fail to open the database.
 
 Two GitHub Actions workflows:
 - **`.github/workflows/ci.yml`** — install, typecheck, lint, unit tests, web build. Runs on every push/PR.
-- **`.github/workflows/android-debug.yml`** — the above plus Capacitor Android platform setup, `cap sync`, a Gradle debug build, and uploads `app-debug.apk` as a downloadable workflow artifact.
+- **`.github/workflows/android-build.yml`** — the full pipeline through a real Capacitor Android debug build, manually triggered. See "Android Beta Testing" below.
 
-Push this repo to GitHub to actually exercise them — nothing here has run yet.
+Push this repo to GitHub to actually exercise them — see `docs/CI_TESTING.md` for the current (unverified) status of every check.
+
+## Android Beta Testing
+
+This builds a real native Android debug APK via Capacitor — not a browser
+preview, not a mocked build. GitHub Pages, if this repo has it configured,
+only deploys a web preview and does **not** prove the Android app works;
+this workflow is the actual Android verification.
+
+1. Open the repository on GitHub.
+2. Go to the **Actions** tab.
+3. Select **Build Android APK** in the workflow list on the left.
+4. Click **Run workflow**.
+5. In the branch dropdown, select the branch you want to test (e.g. `New-arch`).
+6. Click **Run workflow** to start it.
+7. Wait for the run to finish — it typechecks, runs unit tests, builds the web app, syncs Capacitor, and compiles a debug APK with Gradle. This can take several minutes, mostly for the Android SDK/Gradle steps.
+8. Open the completed run. **A green checkmark means every step — typecheck, tests, build, Capacitor sync, and the Android build — actually passed.** A red X means something failed; open the failing step's log before trusting anything downstream of it.
+9. Scroll to the **Artifacts** section of the run and download **`spend-tracker-android-debug`**.
+10. Unzip it if needed, then transfer `app-debug.apk` to an Android device and install it (you'll need to allow installs from unknown sources, since this isn't a Play Store build).
+
+**A failed workflow run must be investigated before the APK is trusted** —
+do not install an APK from a run that shows a red X or that never
+completed; the debug APK from a failed run may be stale, missing, or built
+from partially-broken code.
 
 ## Read these first
 
